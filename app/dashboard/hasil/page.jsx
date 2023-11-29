@@ -1,7 +1,14 @@
+import PageHeading from "@/app/components/PageHeading";
+import MyResponsivePie from "@/app/components/PieChart";
+
+import { PIE_DATA as data } from "@/app/constant/pie";
+
 const KelolaHasil = () => {
   return (
     <>
-      <h1>Kelola Hasil</h1>
+      <PageHeading title="Dashboard Admin | Kelola Perhitungan" />
+
+      <MyResponsivePie data={data} />
     </>
   );
 };
