@@ -24,7 +24,7 @@ const Login = () => {
       <Navbar />
       <div className="container mx-auto m-8 flex flex-col sm:flex-row justify-around bg-white p-4 sm:p-8 sm:rounded-lg ">
         <div className="logoPemilu mb-4 sm:mb-0">
-          <Image src={Logo} alt="logo" />
+          <Image src={Logo} alt="logo" width={50} height={50} />
         </div>
         <div className="formLogin bg-white p-4 sm:p-8 rounded-lg shadow-md">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Login Admin</h2>
