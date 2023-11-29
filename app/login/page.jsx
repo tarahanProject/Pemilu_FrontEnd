@@ -22,11 +22,11 @@ const Login = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto m-8 flex flex-col sm:flex-row justify-around bg-white p-4 sm:p-8 sm:rounded-lg ">
-        <div className="logoPemilu mb-4 sm:mb-0">
+      <div className="container mx-auto m-8 flex flex-col sm:flex-row justify-around bg-white p-4 sm:p-8 sm:rounded-lg">
+        <div className="mb-4 sm:mb-0">
           <Image src={Logo} alt="logo" />
         </div>
-        <div className="formLogin bg-white p-4 sm:p-8 rounded-lg shadow-md">
+        <div className="bg-white p-4 sm:p-8 rounded-lg shadow-md">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Login Admin</h2>
           <form action="" onSubmit={onHandleSubmit}>
             <div className="mb-2 sm:mb-4">
@@ -40,7 +40,7 @@ const Login = () => {
                 type="text"
                 id="username"
                 className="w-full py-2 px-3 border rounded-md"
-                placeholder="Masukkan username"
+                placeholder="Masukkan Username..."
                 onChange={(e) => {
                   setFormData({
                     ...formData,
@@ -60,7 +60,7 @@ const Login = () => {
                 type="password"
                 id="password"
                 className="w-full py-2 px-3 border rounded-md"
-                placeholder="Masukkan password"
+                placeholder="Masukkan Password..."
                 onChange={(e) => {
                   setFormData({
                     ...formData,
