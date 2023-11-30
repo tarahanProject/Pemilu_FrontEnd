@@ -1,228 +1,81 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
-
-import { BsPlusLg, BsTrashFill } from "react-icons/bs";
-import { FiEdit } from "react-icons/fi";
+import { useState, useEffect } from "react";
 
 import PageHeading from "@/app/components/PageHeading";
+import Button from "@/app/components/elements/Button";
 
-const TABLE_HEAD = ["ID", "Nama Calon", "Visi", "Misi", "Foto Calon", "Action"];
+import { getDataPenduduk, generaTokenPenduduk } from "@/services/penduduk";
 
-const TABLE_ROW_CALON = [
-  {
-    id: 1,
-    calon: "Calon 1",
-    visi: "Visi 1",
-    misi: "Misi 1",
-  },
-  {
-    id: 2,
-    calon: "Calon 2",
-    visi: "Visi 2",
-    misi: "Misi 2",
-  },
-];
+const TABLE_HEAD = ["ID", "Nama Penduduk", "NIK", "Token"];
 
 const KelolaPenduduk = () => {
-  const [showForm, setShowForm] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [formDataCalon, setFormDataCalon] = useState({
-    nama: "",
-    visi: "",
-    misi: "",
-    foto: null,
-  });
-  const [foto, setFoto] = useState(null);
+  const [dataPenduduk, setDataPenduduk] = useState([]);
+  const [token, setToken] = useState("");
 
-  const onSubmitHandleAdd = async (event) => {
-    event.preventDefault();
-    formDataCalon.foto = foto;
-
-    setFormDataCalon({
-      nama: "",
-      visi: "",
-      misi: "",
-      foto: null,
-    });
-    setFoto(null);
-    setShowForm(false);
+  const fetchData = async () => {
+    const data_penduduk = await getDataPenduduk();
+    setDataPenduduk([...data_penduduk.Data]);
   };
 
-  const onHandleImage = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const image = e.target.files[0];
-      setFoto(image);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onHandleGenerateToken = async (id) => {
+    setToken("");
+    try {
+      setShowModal(true);
+      const data = await generaTokenPenduduk(id);
+      fetchData();
+      setToken(data.token);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
     <>
-      <PageHeading title="Dashboard Admin | Kelola Calon" />
-      {showForm ? (
-        <div className="flex flex-col justify-center items-center mt-5">
-          <h1 className="text-3xl font-bold mb-5">Form Data Calon</h1>
-          <div className="flex flex-col bg-white p-10 rounded-xl  divide-y">
-            <div className="">
-              <h1 className="text-2xl font-bold mb-5">Data Calon</h1>
-              <p>Isi Data Calon Dengan Benar</p>
-            </div>
-            <form
-              action=""
-              className="flex flex-col pt-5"
-              onSubmit={onSubmitHandleAdd}
-            >
-              <div className="flex justify-between ">
-                <div className="flex flex-col">
-                  <div className="w-full px-3">
-                    <label
-                      className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                      htmlFor="nama-calon"
-                    >
-                      Nama Calon
-                    </label>
-                    <input
-                      className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="nama-calon"
-                      type="text"
-                      placeholder="Nama Calon..."
-                      onChange={(e) => [
-                        setFormDataCalon({
-                          ...formDataCalon,
-                          nama: e.target.value,
-                        }),
-                      ]}
-                      required
-                    />
-                  </div>
-                  <div className="w-full px-3">
-                    <label
-                      className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                      htmlFor="visi"
-                    >
-                      Visi
-                    </label>
-                    <input
-                      className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="visi"
-                      type="text"
-                      placeholder="Visi Calon..."
-                      onChange={(e) => [
-                        setFormDataCalon({
-                          ...formDataCalon,
-                          visi: e.target.value,
-                        }),
-                      ]}
-                      required
-                    />
-                  </div>
-                  <div className="w-full px-3">
-                    <label
-                      className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                      htmlFor="misi"
-                    >
-                      Misi
-                    </label>
-                    <input
-                      className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      id="misi"
-                      type="text"
-                      placeholder="Misi Calon..."
-                      onChange={(e) => [
-                        setFormDataCalon({
-                          ...formDataCalon,
-                          misi: e.target.value,
-                        }),
-                      ]}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="px-3">
-                  <label
-                    className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                    htmlFor="foto-calon"
-                  >
-                    Foto Calon
-                  </label>
-                  <input id="foto-calon" type="file" onChange={onHandleImage} />
-                </div>
-              </div>
-              <div className="flex flex-col justify-center items-center gap-3 mt-5">
-                <button
-                  type="submit"
-                  className="rounded-xl bg-orange-500 text-white font-bold px-3 py-2"
-                >
-                  Tambah Calon
-                </button>
-                <button
-                  className="rounded-xl bg-black text-white font-bold px-3 py-2"
-                  onClick={() => setShowForm(false)}
-                >
-                  Batalkan
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white m-5 rounded-lg">
-          <div className="flex justify-start p-8">
-            <button
-              className="btn text-gray-500 bg-[#FDE9CC] hover:bg-[#E0924A] hover:text-white"
-              type="button"
-              onClick={() => setShowForm(true)}
-            >
-              <BsPlusLg size={20} />
-              <span>Add Calon</span>
-            </button>
-          </div>
-          <div className="overflow-x-auto h-fit pb-5 scrollbar-hide">
-            <table className="table table-pin-rows">
-              <thead className="font-bold text-black">
-                <tr>
-                  {TABLE_HEAD.map((head) => (
-                    <th className="" key={head}>
-                      {head}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {TABLE_ROW_CALON.map(({ id, calon, visi, misi, foto }) => (
-                  <tr key={id}>
-                    <td>{id}</td>
-                    <td>{calon}</td>
-                    <td>{visi}</td>
-                    <td>{misi}</td>
-                    <td>
-                      <Image
-                        src="/assets/logo.png"
-                        width={50}
-                        height={50}
-                        alt=""
-                      />
-                    </td>
-                    <td>
-                      <div className="flex gap-3">
-                        <button
-                          className="text-[#624DE3]"
-                          onClick={() => setShowModal(true)}
-                        >
-                          <FiEdit size={20} />
-                        </button>
-                        <button className="text-[#A30D11]">
-                          <BsTrashFill size={20} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+      <PageHeading title="Dashboard Admin | Kelola Penduduk" />
+      <div className="bg-white m-5 rounded-lg">
+        <div className="overflow-x-auto h-screen p-5">
+          <table className="table table-pin-rows">
+            <thead className="font-bold text-black">
+              <tr>
+                {TABLE_HEAD.map((head) => (
+                  <th className="" key={head}>
+                    {head}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {dataPenduduk.map(({ Id, Name, Nik, Status }) => (
+                <tr key={Id}>
+                  <td>{Id}</td>
+                  <td>{Name}</td>
+                  <td>{Nik}</td>
+                  <td>
+                    <div className="flex gap-3">
+                      <div>
+                        {Status === "false" ? (
+                          <Button
+                            text={"Generate Token"}
+                            onClick={() => onHandleGenerateToken(Id)}
+                            className={"p-3 bg-green-500 text-white rounded-xl"}
+                          />
+                        ) : (
+                          <p>Token Sudah Digunakan</p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
       {showModal ? (
         <>
           <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
@@ -231,89 +84,20 @@ const KelolaPenduduk = () => {
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none divide-y">
                 {/*header*/}
                 <div className="flex flex-col justify-center items-start px-5 pt-5 pb-2 border-b border-solid border-blueGray-200 rounded-t">
-                  <h3 className="text-3xl font-bold pb-2">Form Edit Calon</h3>
-                  <p>Update Data Calon dengan Teliti</p>
+                  <h3 className="text-3xl font-bold pb-2">Token Penduduk</h3>
+                  <p>Catat Token atau Hapalkan Token dibawah ini!</p>
                 </div>
-
                 <div className="relative p-6 flex-auto">
-                  <form action="" className="flex flex-col pt-5">
-                    <div className="flex justify-between ">
-                      <div className="flex flex-col">
-                        <div className="w-full px-3">
-                          <label
-                            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                            htmlFor="nama-calon"
-                          >
-                            Nama Calon
-                          </label>
-                          <input
-                            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                            id="nama-calon"
-                            type="text"
-                            placeholder="Nama Calon..."
-                            required
-                          />
-                        </div>
-                        <div className="w-full px-3">
-                          <label
-                            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                            htmlFor="visi"
-                          >
-                            Visi
-                          </label>
-                          <input
-                            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                            id="visi"
-                            type="text"
-                            placeholder="Visi Calon..."
-                            required
-                          />
-                        </div>
-                        <div className="w-full px-3">
-                          <label
-                            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                            htmlFor="misi"
-                          >
-                            Misi
-                          </label>
-                          <input
-                            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                            id="misi"
-                            type="text"
-                            placeholder="Misi Calon..."
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="px-3">
-                        <label
-                          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                          htmlFor="foto-calon"
-                        >
-                          Foto Calon
-                        </label>
-                        <input
-                          id="foto-calon"
-                          type="file"
-                          onChange={onHandleImage}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-center items-center gap-3 mt-5">
-                      <button
-                        type="submit"
-                        className="rounded-xl bg-orange-500 text-white font-bold px-3 py-2"
-                      >
-                        Tambah Calon
-                      </button>
-                      <button
-                        className="rounded-xl bg-black text-white font-bold px-3 py-2"
-                        onClick={() => setShowForm(false)}
-                      >
-                        Batalkan
-                      </button>
-                    </div>
-                  </form>
+                  <p>{token}</p>
+                </div>
+                <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                  <button
+                    className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

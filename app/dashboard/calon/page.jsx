@@ -1,52 +1,92 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { BsPlusLg, BsTrashFill } from "react-icons/bs";
 import { FiEdit } from "react-icons/fi";
+import Swal from "sweetalert2";
 
 import PageHeading from "@/app/components/PageHeading";
 
-const TABLE_HEAD = ["ID", "Nama Calon", "Visi", "Misi", "Foto Calon", "Action"];
+import {
+  getDataCalon,
+  createDataCalon,
+  deleteDataCalon,
+} from "@/services/calon";
 
-const TABLE_ROW_CALON = [
-  {
-    id: 1,
-    calon: "Calon 1",
-    visi: "Visi 1",
-    misi: "Misi 1",
-  },
-  {
-    id: 2,
-    calon: "Calon 2",
-    visi: "Visi 2",
-    misi: "Misi 2",
-  },
-];
+const TABLE_HEAD = ["ID", "Nama Calon", "Visi", "Misi", "Foto Calon", "Action"];
 
 const KelolaCalon = () => {
   const [showForm, setShowForm] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [dataCalon, setDataCalon] = useState([]);
   const [formDataCalon, setFormDataCalon] = useState({
-    nama: "",
+    name: "",
+    foto: null,
     visi: "",
     misi: "",
-    foto: null,
   });
   const [foto, setFoto] = useState(null);
+
+  const fetchData = async () => {
+    const data_calon = await getDataCalon();
+    data_calon.Data === null
+      ? setDataCalon([])
+      : setDataCalon([...data_calon.Data]);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const onSubmitHandleAdd = async (event) => {
     event.preventDefault();
     formDataCalon.foto = foto;
 
-    setFormDataCalon({
-      nama: "",
-      visi: "",
-      misi: "",
-      foto: null,
+    try {
+      const data = await createDataCalon(formDataCalon);
+      console.log(data);
+
+      setFormDataCalon({
+        name: "",
+        visi: "",
+        misi: "",
+        foto: null,
+      });
+      fetchData();
+      setFoto(null);
+      setShowForm(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onHandleDelete = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const data = await deleteDataCalon(id);
+          console.log(data);
+
+          fetchData();
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your Data has been deleted.",
+            icon: "success",
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
     });
-    setFoto(null);
-    setShowForm(false);
   };
 
   const onHandleImage = (e) => {
@@ -71,6 +111,7 @@ const KelolaCalon = () => {
               action=""
               className="flex flex-col pt-5"
               onSubmit={onSubmitHandleAdd}
+              encType="multipart/form-data"
             >
               <div className="flex justify-between ">
                 <div className="flex flex-col">
@@ -89,7 +130,7 @@ const KelolaCalon = () => {
                       onChange={(e) => [
                         setFormDataCalon({
                           ...formDataCalon,
-                          nama: e.target.value,
+                          name: e.target.value,
                         }),
                       ]}
                       required
@@ -189,19 +230,14 @@ const KelolaCalon = () => {
                 </tr>
               </thead>
               <tbody>
-                {TABLE_ROW_CALON.map(({ id, calon, visi, misi, foto }) => (
-                  <tr key={id}>
-                    <td>{id}</td>
-                    <td>{calon}</td>
-                    <td>{visi}</td>
-                    <td>{misi}</td>
+                {dataCalon.map(({ Id, Name, Visi, Misi, Foto }) => (
+                  <tr key={Id}>
+                    <td>{Id}</td>
+                    <td>{Name}</td>
+                    <td>{Visi}</td>
+                    <td>{Misi}</td>
                     <td>
-                      <Image
-                        src="/assets/logo.png"
-                        width={50}
-                        height={50}
-                        alt=""
-                      />
+                      <Image src={Foto} width={50} height={50} alt="" />
                     </td>
                     <td>
                       <div className="flex gap-3">
@@ -211,7 +247,10 @@ const KelolaCalon = () => {
                         >
                           <FiEdit size={20} />
                         </button>
-                        <button className="text-[#A30D11]">
+                        <button
+                          className="text-[#A30D11]"
+                          onClick={() => onHandleDelete(Id)}
+                        >
                           <BsTrashFill size={20} />
                         </button>
                       </div>
